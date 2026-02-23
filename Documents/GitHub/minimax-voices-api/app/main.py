@@ -1,6 +1,6 @@
 """
 FastAPI AI Capability Server
-===========================
+==========================
 
 Stateless AI generation service.
 Input → Output. No retries, no queue, no database.
@@ -18,7 +18,9 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.routers import script, enrich, tts, image, music, video
 
@@ -53,6 +55,47 @@ app.include_router(tts.router, prefix="/tts", tags=["TTS"])
 app.include_router(image.router, prefix="/image", tags=["Image"])
 app.include_router(music.router, prefix="/music", tags=["Music"])
 app.include_router(video.router, prefix="/video", tags=["Video"])
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    """Root page with links to docs."""
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>AI Capability Server</title>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+            h1 { color: #333; }
+            .endpoints { background: #f5f5f5; padding: 20px; border-radius: 8px; }
+            .endpoint { margin: 10px 0; }
+            a { color: #0066cc; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+            code { background: #e0e0e0; padding: 2px 6px; border-radius: 3px; }
+        </style>
+    </head>
+    <body>
+        <h1>AI Capability Server</h1>
+        <p>Stateless AI generation service. Input Output.</p>
+        
+        <div class="endpoints">
+            <h2>Available Endpoints</h2>
+            <div class="endpoint"><a href="/docs">/docs</a> - API Documentation (Swagger UI)</div>
+            <div class="endpoint"><a href="/redoc">/redoc</a> - ReDoc Documentation</div>
+            <div class="endpoint"><a href="/health">/health</a> - Health Check</div>
+            <div class="endpoint"><a href="/models">/models</a> - Available Models</div>
+            <hr>
+            <div class="endpoint"><code>POST /script</code> - Generate video script</div>
+            <div class="endpoint"><code>POST /scenes/enrich</code> - Enrich scenes with music</div>
+            <div class="endpoint"><code>POST /tts</code> - Text-to-Speech</div>
+            <div class="endpoint"><code>POST /image</code> - Image generation</div>
+            <div class="endpoint"><code>POST /music</code> - Music generation</div>
+            <div class="endpoint"><code>POST /video</code> - Video generation</div>
+        </div>
+    </body>
+    </html>
+    """
 
 
 @app.get("/health")
